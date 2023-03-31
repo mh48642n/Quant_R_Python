@@ -1,0 +1,57 @@
+First pull data into phpmyadmin and retrieve what I want
+- Gotta make a table in myphpadmin so I can import data: 
+
+First I created a database called full_condo_data
+CREATE DATABASE full_condo_data;
+This is the query that created the table, and then imported the CSV data into the table through XAMPP's: 
+CREATE TABLE 'condo_original_data'(  
+  Boro_Block_Lot varchar(25), Condo_Section varchar(10),Address varchar(40),
+  Neighborhood varchar(40), Building_Class varchar(20), Total_Unit int, 
+  Year_Built int, Gross_Sqft int, Estimated_Gross_Income int,
+  Gross_Income_per_SQFT float, Estimated_Expense int, Expense_per_Sqft float, 
+  NET_Operating_Income int, Full_Market_Value int, Market_Val_per_Sqft float, 
+  
+  Boro_Block_Lot_1 varchar(25), Address_1 varchar(40),
+  Neighborhood_1 varchar(40), Building_Class_1 varchar(20), Total_Unit_1 int, 
+  Year_Built_1 int, Gross_Sqft_1 int, Estimated_Gross_Income_1 int, 
+  Gross_Income_per_SQFT_1 float, Estimated_Expense_1 int, Expense_per_Sqft_1 float, 
+  NET_Operating_Income_1 int, Full_Market_Value_1 int, Market_Val_per_Sqft_1 float, 
+  Distance_from_Subject_Condo_in_Miles float,
+  
+  Boro_Block_Lot_2 varchar(25), Address_2 varchar(40), Neighborhood_2 varchar(40),
+  Building_Class_2 varchar(20), Total_Unit_2 int, Year_Built_2 int, 
+  Gross_Sqft_2 int, Estimated_Gross_Income_2 int, Gross_Income_per_SQFT_2 float, 
+  Estimated_Expense_2 int, Expense_per_Sqft_2 float, NET_Operating_Income_2 int, 
+  Full_Market_Value_2 int,Market_Val_per_Sqft_2 float, Distance_from_Subject_Condo_in_Miles_1 float,
+  
+  Boro_Block_Lot_3 varchar(25), Address_3 varchar(40), Neighborhood_3 varchar(40),
+  Building_Class_3 varchar(20), Total_Unit_3 int, Year_Built_3 int, 
+  Gross_Sqft_3 int, Estimated_Gross_Income_3 int, Gross_Income_per_SQFT_3  float,
+  Estimated_Expense_3 int, Expense_per_Sqft_3 float, NET_Operating_Income_3 int,
+  Full_Market_Value_3 int, Market_Val_per_Sqft_3 float, Distance_from_Subject_Condo_in_Miles_2 float
+  Report_Year
+ 
+);
+  
+***After importing the data into the table, if your database application didn't have a feature 
+that recognized the first row as columns so now you got a row with just column names run this:
+DELETE FROM condo_original_data WHERE Address = 'Address';
+
+- Grab the columns that I want and even reduce the data down to 500, I'll make that a query table and call it sample
+CREATE TABLE sample_of_data AS
+    SELECT
+      Boro_Block_Lot, Condo_Section, Address, Neighborhood,
+      Building_Class, Total_Unit, Year_Built, Gross_Sqft,
+      Estimated_Gross_Income, Gross_Income_per_SQFT, Estimated_Expense,
+      Expense_per_Sqft, NET_Operating_Income, Full_Market_Value,
+      Market_Val_per_Sqft, Report_Year
+FROM condo_original_data
+LIMIT 10000
+;
+- Finally export that data and prepare it for more EDA
+
+Second look at the data, and decide what information I'd want to correlate and why
+Third use R to use the correlation matrix, to determine what has a significant correlation to each other
+Fourth make a regression with one dependent variable and two or three independent variables
+Fifth determine the regression line equation and run the summary command on that to get t-stat and more
+Sixth make a scatter plot, with a line of best fit

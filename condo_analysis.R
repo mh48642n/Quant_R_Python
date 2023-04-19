@@ -2,79 +2,69 @@
 library(readxl)
 library(dplyr)
 library()
-initial_data <- read_xlsx(file.choose(), sheet = "DOF_Condos")
+initial_data <- read_excel("C:\\Users\\marvi\\OneDrive\\Documents\\GitHub\\Quant_R_Python\\DOF_Rent_income.xlsx", 
+                           sheet = "DOF_Condos")
 
 #Now attach and simplify the data further
 attach(initial_data)
 as.data.frame(initial_data)
-initial_data <- initial_data[1:10000, ]
-
 
 colnames(initial_data)
-
 str(initial_data)
-
 
 #principles for dealing with the changing world order
 #Make use of the factor function to categorize the neighborhood data 
 #Categorize the data into zip code info, hence making the column numerical
 #Then make a regression off with Income, Expenditures as the regressors
 #Then I will use Gross Sqft(greater than some number) and Neighborhood as a dummy variable
-factor_neighborhood <- factor(Neighborhood, levels = rev(unique(Neighborhood)), ordered = T)
+factor_neighborhood <- factor(Neighborhood, levels = rev(unique(Neighborhood)), ordered = F)
 levels(factor_neighborhood)
 
-#This is block of code makes use of the excel sheet neighborhoods
+help(collapse)
+  
+#Here I will create dummy variables
 
-#3 vector variables are created: column.names, borough_ids, and id_nums
-#This will help create a dataframe for another purpose
-column.names <- c("Borough", "Id number")
-borough_ids <- c("Brooklyn","Bronx",
-                 "Queens","Manhattan"
-                 ,"Staten Island" ,"Unspecified")
-id_nums <- c(1:7)
+#I make use of the ifelse function to create the dummy variables
+#Based off of the code in the Boro-Block-Lot where the first number would determine
+#what Borough the property is located in New York
+initial_data$In_Man <- ifelse(grepl("1-", initial_data$`Boro-Block-Lot`), 1, 0)
+initial_data$In_Bx <- ifelse(grepl("2-", initial_data$`Boro-Block-Lot`), 1, 0)
+initial_data$In_Bk <- ifelse(grepl("3-", initial_data$`Boro-Block-Lot`), 1, 0)
+initial_data$In_Qn <- ifelse(grepl("4-", initial_data$`Boro-Block-Lot`), 1, 0)
+initial_data$In_SI <- ifelse(grepl("5-", initial_data$`Boro-Block-Lot`), 1, 0)
 
-#Using the vector variables above I constructed a dataframe
-#I'll use this dataframe to then full join with the sheet Neighborhoods
-borough_ids <- array(c(borough_ids, id_nums), dim = c(6,2,1))
-borough_ids <- as.data.frame(borough_ids)
-colnames(borough_ids) <- column.names
-
-#Now I attach the excel sheet neighborhood so I can be more intimate with the data  
-neighborhoods <- read_xlsx(file.choose(), sheet = "Neighborhoods")
-neighborhoods <- neighborhoods[, 1:2]
-
-#Here I will create three dummy variables
 summary(`Total Units`)
 summary(`Gross SqFt`)
+
+
+initial_data <- initial_data %>% select(-contains("Condo")) 
+initial_data<- initial_data %>% select(-contains("Address"))
+complete_data<- initial_data %>% select(-contains("Building"))
+
+
+colnames(complete_data)
 
 #Based off of the summary statistics above I'll use the medians to determine
 #What the dummy variables will be based on.
 complete_dataset$Units_more_than_71 <- ifelse(`Total Units` > 71.0, 1, 0)
 complete_dataset$GSqft_more_than_34k<- ifelse(`Gross SqFt` > 35990, 1, 0)
 
-
-#Finally I create a data object called B_to_N which relates the neighborhoods to their
-#corresponding borough. I accomplish this by doing a full join using dplyr library 
-#between the objects neighborhoods and borough_ids object joining on Borough 
-B_to_N <- full_join(neighborhoods, borough_ids, by = "Borough", multiple = "all")
-B_to_N
-colnames(B_to_N)
-
-#Here I joined the initial_data object with the B_to_N data object 
-complete_dataset <- inner_join(initial_data, B_to_N, by = c("Neighborhood"), multiple = "all" )
 #now I'm checking the median and max of gross sqft and total units, this is for each neighborhood
-tapply(complete_dataset$`Gross SqFt`, complete_dataset$Neighborhood, max)
-tapply(complete_dataset$`Gross SqFt`, complete_dataset$Neighborhood, median)
-tapply(complete_dataset$`Total Units`, complete_dataset$Neighborhood, max)
-tapply(complete_dataset$`Total Units`, complete_dataset$Neighborhood, median)
+tapply(complete_data$`Gross SqFt`, complete_data$Neighborhood, mean)
+tapply(complete_data$`Gross SqFt`, complete_data$Neighborhood, median)
+tapply(complete_data$`Total Units`, complete_data$Neighborhood, max)
+tapply(complete_data$`Total Units`, complete_data$Neighborhood, median)
 
+complete_data$comparable_avg_gross_sqft<-
 
 colnames(complete_dataset)
 
 #Correlates Year Built, Gross Sqft, Estimated Gross Income, Estimated Expense Net and Full Market Value
+#Update the columns are different so this wrong and will need to be corrected
 cor(initial_data[, c(7:9, 11, 13, 14)], use = "complete.obs")
 
 #Correlates Full Market Values of the other comparable apartments
+#Update the columns are different so this wrong and will need to be corrected
 cor(initial_data[, c(13, 14, 27, 42, 57)], use = "complete.obs")
 
 #linear regression function on full market value, with the regressors

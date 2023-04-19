@@ -33,16 +33,15 @@ initial_data$In_Bk <- ifelse(grepl("3-", initial_data$`Boro-Block-Lot`), 1, 0)
 initial_data$In_Qn <- ifelse(grepl("4-", initial_data$`Boro-Block-Lot`), 1, 0)
 initial_data$In_SI <- ifelse(grepl("5-", initial_data$`Boro-Block-Lot`), 1, 0)
 
-summary(`Total Units`)
-summary(`Gross SqFt`)
-
-
 initial_data <- initial_data %>% select(-contains("Condo")) 
 initial_data<- initial_data %>% select(-contains("Address"))
 complete_data<- initial_data %>% select(-contains("Building"))
 
-
 colnames(complete_data)
+
+#If I need more dummy variables I'll use the summary stats for these two variables
+summary(`Total Units`)
+summary(`Gross SqFt`)
 
 #Based off of the summary statistics above I'll use the medians to determine
 #What the dummy variables will be based on.
@@ -55,9 +54,9 @@ tapply(complete_data$`Gross SqFt`, complete_data$Neighborhood, median)
 tapply(complete_data$`Total Units`, complete_data$Neighborhood, max)
 tapply(complete_data$`Total Units`, complete_data$Neighborhood, median)
 
-complete_data$comparable_avg_gross_sqft<-
 
-colnames(complete_dataset)
+
+colnames(complete_data)
 
 #Correlates Year Built, Gross Sqft, Estimated Gross Income, Estimated Expense Net and Full Market Value
 #Update the columns are different so this wrong and will need to be corrected

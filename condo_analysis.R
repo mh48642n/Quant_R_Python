@@ -1,7 +1,7 @@
 #First extracted the data from csv file
 library(readxl)
 library(dplyr)
-library()
+library(writexl)
 initial_data <- read_excel("C:\\Users\\marvi\\OneDrive\\Documents\\GitHub\\Quant_R_Python\\DOF_Rent_income.xlsx", 
                            sheet = "DOF_Condos")
 
@@ -39,6 +39,10 @@ complete_data<- initial_data %>% select(-contains("Building"))
 
 colnames(complete_data)
 
+#Writing this away into python
+write_xlsx(complete_data,
+           "C:\\Users\\marvi\\OneDrive\\Documents\\GitHub\\Quant_R_Python\\Cleaned_Condo_Data.xlsx")
+
 #If I need more dummy variables I'll use the summary stats for these two variables
 summary(`Total Units`)
 summary(`Gross SqFt`)
@@ -47,6 +51,7 @@ summary(`Gross SqFt`)
 #What the dummy variables will be based on.
 complete_dataset$Units_more_than_71 <- ifelse(`Total Units` > 71.0, 1, 0)
 complete_dataset$GSqft_more_than_34k<- ifelse(`Gross SqFt` > 35990, 1, 0)
+
 
 #now I'm checking the median and max of gross sqft and total units, this is for each neighborhood
 tapply(complete_data$`Gross SqFt`, complete_data$Neighborhood, mean)

@@ -18,7 +18,7 @@ Second look at the data, and decide what information I'd want to correlate and w
      3. Then have another group columns that have the means from the comparables 
 	- Total Units to comp_avgtu
 	- Gross Sqft to comp_avggsft
-	- Estimated Gross Income to comp_avgginc (try to get this in millions of dollars)
+	- Estimated Gross Income to comp_avgginc (try to get this in millions of dollars) this has a NaN
 	- Gross Income per Sqft to comp_avggips
 	- Estimated Expense to comp_avgexp (try to get this in millions of dollars)
 	- Expense per Sqft to comp_avgeps
@@ -28,6 +28,7 @@ Second look at the data, and decide what information I'd want to correlate and w
      4. Attempt to do the things above by Neighborhood   
 
 Third use R to use the correlation matrix, to determine what has a significant correlation to each other
+      - 
 Fourth determine the regression line equation and run the summary command on that to get t-stat and more
 - I'll be making use of the plot function which will give multiple things that I can understand about the data
 - I'll also be using the pairs function to get a scatter plot for each regressor so I can understand what the relationship between the y and x is

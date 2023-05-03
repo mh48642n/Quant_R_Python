@@ -89,7 +89,7 @@ def regextolist(data, columns):
    print(data)
    return data
    
-'This function works!!!' 
+'This function works!!!!' 
 'This list out all the columns names with key values so if I want to access these values individually'
 'I can do that and I can also make this into a dataframe'                       
 clean_data = filter_out(data)

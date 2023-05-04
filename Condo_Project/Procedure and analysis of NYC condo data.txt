@@ -1,0 +1,44 @@
+First pull data into phpmyadmin and retrieve what I want
+- I attmepted to make a database in phpadmin but it wasn't working so I decided to just pull the data into R instead.
+- However I will look at the data in Excel before I use to R to do some mutation of the data
+
+Second look at the data, and decide what information I'd want to correlate and why
+
+- After viewing the data in Excel I decided in the beginning that I wanted to make Neighborhood, Net Income(for all comparables) a regressor  
+
+- I'm going to clean up the data and attempt to view the data for individual neighborhoods instead of each individual observation of condo
+     1. I added dummy variables based on borough so if a property is in brooklyn there'll be a one 
+     2. Make use of the library("writexl") that'll take the dataframe made in r and export it as a excel worksheet
+     3. This will allow me to clean the data better in python
+
+- I'm going to pull the data into python to do some further data cleaning and after that I'll pull the data back into R 
+  to officially restart analysis of the information
+     1. Use groupby function in Python which operates the same as collapse function in stata
+     2. Clean data so I have one group of numerical columns from the property value being determined 
+     3. Then have another group columns that have the means from the comparables 
+	- Total Units to comp_avgtu
+	- Gross Sqft to comp_avggsft
+	- Estimated Gross Income to comp_avgginc (try to get this in millions of dollars) this has a NaN
+	- Gross Income per Sqft to comp_avggips
+	- Estimated Expense to comp_avgexp (try to get this in millions of dollars)
+	- Expense per Sqft to comp_avgeps
+	- NET to comp_avgnet (try to get this in millions of dollars)
+	- Full Market Value to comp_avgfmv (try to get this in millions of dollars)
+	- Market Value per Sqft to comp_avgmvps
+     4. Attempt to do the things above by Neighborhood   
+
+Third use R to use the correlation matrix, to determine what has a significant correlation to each other
+      - 
+Fourth determine the regression line equation and run the summary command on that to get t-stat and more
+- I'll be making use of the plot function which will give multiple things that I can understand about the data
+- I'll also be using the pairs function to get a scatter plot for each regressor so I can understand what the relationship between the y and x is
+
+Fifth make a scatter plot, with a line of best fit
+
+Sixth make a regression with one dependent variable and two or three independent variables
+
+*Seventh try to make an interaction if you have to and interpret properly
+
+*Eighth look for functions in r that check for heteroskedacity and fixes it  
+
+*Nineth look for functions that finds Multicollinearity and determine if you only have to address it or change the variable

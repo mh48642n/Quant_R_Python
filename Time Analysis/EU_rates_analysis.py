@@ -29,6 +29,8 @@ print(rates[:10])
 dictt = {"date": dates, "rate": rates}
 r_to_d = pd.DataFrame(dictt)
 
-#now graphing can begin!!!!!
+r_to_d.to_excel('Exchange_numbers_.xlsx', sheet_name = "Euro exchange rates", index = False)
+
+
 
 

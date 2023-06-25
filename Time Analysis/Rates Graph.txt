@@ -1,5 +1,0 @@
-- The File called Euro_rates_graph is an attempt to replicate the graph for the data 
-collected by FRED(Federal Reserve Economic Data)
-- I made use of Python to clean up the initial excel file found at https://fred.stlouisfed.org/series/DEXUSEU
-- Then I used R to format it even more and then place on an intereactive similar to the one found on Fred
-  

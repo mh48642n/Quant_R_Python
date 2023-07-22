@@ -2,3 +2,5 @@ First I striped the exchange rate excel sheet that I got from the Federal Reserv
 - From there I attempted to make an interactive graph to allow users to view the exchange rate at a specific point of 
 time
 Second I'm going to attempt to graph multiple lines on the graph, so with my partner's data I will graph the Euro, Yuan and Yen rates 
+- First I'd need to add create a dataframe to make allow R to read the information as a excel sheet
+ 

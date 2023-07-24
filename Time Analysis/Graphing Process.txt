@@ -1,6 +1,9 @@
 First I striped the exchange rate excel sheet that I got from the Federal Reserve Economic Data website 
 - From there I attempted to make an interactive graph to allow users to view the exchange rate at a specific point of 
 time
-Second I'm going to attempt to graph multiple lines on the graph, so with my partner's data I will graph the Euro, Yuan and Yen rates 
-- First I'd need to add create a dataframe to make allow R to read the information as a excel sheet
+- After that I made use of the data from my partner and additional info from FRED to create two excel workbooks
+- Finally I made a large dataset called Dataset_yr&d that I will use to make a graph
+Second I'm going to attempt to graph multiple lines on the graph, so with my partner's data I will graph the Euro, Yuan and Yen rates and then I will add the yield rates 
+- I created the interactive graph with three currencies
+- Then I added a second axis for the yield rate, it hasn't produced a perfect line yet but it's acceptable for now
  

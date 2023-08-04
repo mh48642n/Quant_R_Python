@@ -59,8 +59,8 @@ def newsheet(data1, data2):
    
     
     dictt = {"Dates": dates, 
-             "3-mth yields" : yields_3m, 
-             "Name for 2-yr yields" : yields_2y}
+             "3mth_yields" : yields_3m, 
+             "2yr_yields" : yields_2y}
     
     yields_to_d = pd.DataFrame(dictt)
     return yields_to_d
@@ -70,18 +70,15 @@ ph1 = "C:\\Users\marvi\Downloads\T10Y3M.xlsx"
 ph2 = "C:\\Users\marvi\Downloads\T10Y2Y.xlsx"
 data = newsheet(ph1, ph2)
 
-
-#There are some NA values but those are in fact 0
-#So I'll use the replace function
-data.replace(to_replace = ["=NA()"], value = 0, inplace = True)
-
+#Making sure NA values are still there
+data.replace(to_replace = ["=NA()"], value = np.nan, inplace = True)
 
 #Before adding new dataframe to excel worlbook first create the sheet
 #Load the workbook, create the sheet with the create_sheet func and then save the path
 data.to_excel("Yields.xlsx", sheet_name = "Yield Rates", index = False)
 
 
-del data, lk, page, ph1, ph2, rate_sheet, tk, yield_sheet 
+del data, ph1, ph2
     
 
     

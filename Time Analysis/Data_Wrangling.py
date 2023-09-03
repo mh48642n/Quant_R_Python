@@ -71,10 +71,9 @@ ph2 = "C:\\Users\marvi\Downloads\T10Y2Y.xlsx"
 data = newsheet(ph1, ph2)
 
 #Making sure NA values are still there
-data.replace(to_replace = ["=NA()"], value = np.nan, inplace = True)
+data.replace(to_replace = [""], value = np.nan, inplace = True)
 
-#Before adding new dataframe to excel worlbook first create the sheet
-#Load the workbook, create the sheet with the create_sheet func and then save the path
+#Saving dataframe, data, to a excel workbook
 data.to_excel("Yields.xlsx", sheet_name = "Yield Rates", index = False)
 
 

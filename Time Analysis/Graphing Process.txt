@@ -6,4 +6,6 @@ time
 Second I'm going to attempt to graph multiple lines on the graph, so with my partner's data I will graph the Euro, Yuan and Yen rates and then I will add the yield rates 
 - I created the interactive graph with three currencies
 - Then I added a second axis for the yield rate, it hasn't produced a perfect line yet but it's acceptable for now
- 
+Third I made two graphs one with 10 year - 2 year yields with the currencies, another with 10-year - 3 month yields
+Fourth created a new dataset with couple of new columns: stock indices(S&P 1500, NASDAQ COMP), unemployment, the yields individually for the different maturity types, CPI to accout for inflation, and the dates when the debt ceiling was affected
+Fifth I hope to add the make a tool tip that includes the days when the debt ceiling was raised or current action and all the macro factors

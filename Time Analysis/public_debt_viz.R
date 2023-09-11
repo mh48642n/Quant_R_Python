@@ -1,221 +1,159 @@
 #Sets working directory
 setwd("C:\\Users\\marvi\\OneDrive\\Documents")
 
-answer = readline("Choose how to upload data(Get, Make or Merge): ")
+answer = readline("Upload data(Say): Upload ")
 
-if(answer = "Get"){
-  data <- make_table()
-  attach(data)
-}else if(answer = "Merge"){
-  data <- merging_tables()
-  attach(data)
-}else {
+if(answer == "Upload") {
   library(readxl)
   data <- read_excel(file.choose())
   attach(data)
 }
 
-
-#Pulls exchange_rates and yields from PC
-#Merges them on dates
-#It modifies the date datatype and creates a excel sheet and saves on pc
-merging_tables <- function(){
-    library(readxl)
-    d1 <- read_excel(file.choose())
-    d2 <- read_excel(file.choose())
-  
-    library(dplyr)
-    library(scales)
-    data <- merge(d1, d2, by = "dates", all.y = TRUE) %>% 
-      mutate(dates = as.Date(dates, format = "%Y-%m-%d"))
-    data <- data %>% mutate(dates = as.Date(dates, format = "%Y-%m-%d"))
-    str(data)
-    return(data)
-}
-make_table <- function(){
-  data <- merging_tables()  
-
-  library(writexl)
-  write_xlsx(data, readline("Name of document"))
-  
-  return(data)
-}
-
-data <- data %>% mutate(yields_10yr = as.numeric(yields_10yr),
-                        yields_2yr = as.numeric(yields_2yr),
-                        yields_3mths = as.numeric(yields_3mths))
+library(dplyr)
+library(scales)
+data <- data %>% mutate(dates = as.Date(dates, format = "%Y-%m-%d"))
 str(data)
 
 #libraries needed to graph
 #plotly for interactive 
+
 library(ggplot2)
 library(plotly)
 library(ggthemes)
 library(extrafont)
 
-#Plots the euro rates to dates with a normal ggplot
-#swap out rate for column name for Euro, Yuan or Yen and it should work
-euro_rates <- ggplot(data, mapping = aes(date, euro)) + 
-   geom_line(linewidth = 0.35, color = "orange") + 
-   theme_economist_white() + labs(y = "US Dollars to One Euro\n") +
-   theme(axis.title.y = element_text(family = "Georgia",
-                                     face = "bold",
-                                     colour = "lightblue",
-                                     size = 10),
-         axis.title.x = element_blank(),
-         axis.text.x = element_text(size = 7.5, 
-                                    angle = 45, 
-                                    vjust = 0.65,
-                                    family = "Arial"),
-         axis.text.y = element_text(size = 7.5, 
-                                    family = "Arial",
-                                    hjust = 0)) +
-   scale_x_date(breaks = "1 year", labels = date_format("%m/%Y"), 
-                limits = as.Date(c('1999-01-04', '2023-05-25')), 
-                expand = c(0, 0))
-  
 #fonts for the title and tooltip label
 titlefont <-list(family = "Georgia",
                  size = 20,
                  color = "black")
 axesfont <- list(family = "Georgia",
-                 size = 16,
+                 size = 14,
                  color = "black")
-label <- list(bgcolor = "orange",
+label <- list(text = template,
+              bgcolor = "tan",
               bordercolor = "transparent",
               font = list(family = "Georgia",
                           size = 11,
                           color = "white"))
 
-#Makes the graph interactive so you can trace mouse over plot line
-#Added a range slider to find accurate dates
-fig <- ggplotly(euro_rates, type = 'scatter', mode = 'line') %>% 
-    add_trace(x = ~date, y = ~rate)%>% 
-    layout(title = list(text = 'Exchange Rates: US Dollars to Euro\n', 
-                        font =titlefont, x = 0.0446, y = 10.5),
-           xaxis = list(rangeslider = list(visible = T)),
-           yaxis = list(fixedrange = FALSE)
-           )%>%
-    style(hoverlabel = label)
-fig  
-#Saves the plot as a html file
-library(htmlwidgets)
-saveWidget(fig, "euro_rates_graph.html")
-
-#Now we'll make an interactive graph with three rates at once
-viz0 <- plot_ly(data, x = ~dates,y = ~Euro, name = 'Euro', type = "scatter", mode = "lines", 
-                line = list(color = 'rgb(255, 128, 0)'))%>% 
-  add_trace(y = ~Yuan, name = 'Yuan', mode = "lines", 
-            type = "scatter", line = list(color = 'rgb(0, 128, 255)'))%>%
-  add_trace(y = ~Yen, name = 'Yen', mode = "lines", 
-            type = "scatter", line = list(color = 'rgb(255, 51, 51)'))
-
 #2 yr yields are plotted here
 two_year <- plot_ly(data, x = ~dates, y = ~Euro, mode = "lines", type = "scatter",name = "Euro", 
                line = list(color = "rgb(251,107,1)"))%>%
-  add_trace(x = ~dates, y = ~yields_2yr, mode = "lines", type = "scatter", yaxis = "y2", 
+  add_trace(x = ~dates, y = ~spread_2yr, mode = "lines", type = "scatter", yaxis = "y2", 
             name = "2-yr yields", line = list(color = 'rgb(251,194,2)'))%>%
-  layout(yaxis2 = list(overlaying = "y", side = "right", showgrid = F))
+  layout(yaxis2 = list(overlaying = "y", side = "right", showgrid = F))%>%
+  style(hoverinfo = "skip", traces = c(1, 2))
+  
 
 #3 mth yields are plotted here
 three_mo <- plot_ly(data, x = ~dates,y = ~Euro, mode = "lines", type = "scatter", name = "Euro", 
                line = list(color = 'rgb(251,107,1)'))%>%
-  add_trace(x = ~dates, y = ~yields_3mth, mode = "lines", type = "scatter", yaxis = "y2", 
+  add_trace(x = ~dates, y = ~spread_3mth, mode = "lines", type = "scatter", yaxis = "y2", 
             name = "3-mth yields", line = list(color = 'rgb(251,194,2)')) %>%
-  layout(yaxis2 = list(overlaying = "y", side = "right", showgrid = F))        
+  layout(yaxis2 = list(overlaying = "y", side = "right", showgrid = F))%>%
+  style(hoverinfo = "skip", traces = c(1, 2))        
 
-
+yield_Treasury <- plot_ly(data, x = ~dates, y = ~yields_3mth, mode = "lines", type = "scatter", name = "3 mth yields", 
+                  line = list(color = 'rgb(230, 126, 34)'))%>%
+    add_trace(y = ~yields_2yr, mode = "lines", type = "scatter", name = "2 year yields", line = list(color = 'rgb(175, 96, 26)'))%>%
+    add_trace(y = ~yields_5yr, mode = "lines", type = "scatter", name = "5 year yields", line = list(color = 'rgb(211, 84, 0)'))%>%
+    add_trace(y = ~yields_7yr, mode = "lines", type = "scatter", name = "7 year yields",line = list(color = 'rgb(231, 76, 60)'))%>%
+    add_trace(y = ~yields_10yr, mode = "lines", type = "scatter", name = "10 year yields",line = list(color = 'rgb(148, 49, 38)'))%>%
+    add_trace(y = ~yields_30yr, mode = "lines", type = "scatter",name = "30 year yields" ,line = list(color = 'rgb(192, 57, 43)'))
 #Added the other currencies
-currencies<- function(x, name_graph){
-      x <- x %>% add_trace(y = ~Yuan, name = 'Yuan', mode = "lines", 
+currencies_2yr <- function(value, choice){
+     value <- formatting(value, choice)
+     
+     value <- value %>% add_trace(y = ~Yuan, name = 'Yuan', mode = "lines", 
                   type = "scatter", line = list(color = 'rgb(233,108,27)'))%>%
-                 add_trace(y = ~Yen, name = 'Yen', mode = "lines", 
-                  type = "scatter", line = list(color = 'rgb(255, 51, 51)'))
-      x <- formatting(x, name_graph)
-      return(x)
+                  add_trace(y = ~Yen, name = 'Yen', mode = "lines", 
+                  type = "scatter", line = list(color = 'rgb(255, 51, 51)'),
+                  hoverinfo = 'text',
+                  text = paste("Date: ", dates, 
+                                "\nFor every dollar of US currency: ",
+                                "\n    Euro: ", Euro,
+                                "\n    Yuan: ", Yuan,
+                                "\n    Yen: ", Yen,
+                                "\n    Spread: ", spread_2yr,
+                                "\nDuring the term of President ", 
+                                current_President, "\nthe debt was at ", 
+                                total_debt, "\nActions taken for the debt: ", 
+                                action_taken, "\nPublic Law: ", public_law))%>%
+                  layout(title = list(text = "Exchange Rates vs Spreads", font = titlefont))%>%
+                  style(hoverinfo = "skip", traces = 3)         
+                  
+      return(value)
 }
-#formatting graphs 
-formatting <- function(d, title_){
-  #Buttons work!!!
-  B_Euro <- list(
-    label = "Euro",
-    method = "update",
-    args = list(list(visible = c(TRUE, TRUE, FALSE, FALSE)))
-  )
-  B_Yuan <- list(
-    label = "Yuan",
-    method = "update",
-    args = list(list(visible = c(FALSE, TRUE, TRUE, FALSE)))
-  )
-  B_Yen  <- list(
-    label = "Yen",
-    method = "update",
-    args = list(list(visible = c(FALSE, TRUE, FALSE, TRUE)))
-  )
-  B_All <- list(
-    label = "All",
-    method = "update",
-    args = list(list(visible = c(TRUE, TRUE, TRUE, TRUE)))
-  )
+currencies_3mth <- function(value, choice){
+  value <- formatting(value, choice)
+  
+  value <- value %>% add_trace(y = ~Yuan, name = 'Yuan', mode = "lines", 
+                               type = "scatter", line = list(color = 'rgb(233,108,27)'))%>%
+    add_trace(y = ~Yen, name = 'Yen', mode = "lines", 
+              type = "scatter", line = list(color = 'rgb(255, 51, 51)'),
+              hoverinfo = 'text',
+              text = paste("Date: ", dates, 
+                           "\nFor every dollar of US currency: ",
+                           "\n    Euro: ", Euro,
+                           "\n    Yuan: ", Yuan,
+                           "\n    Yen: ", Yen,
+                           "\n    Spread: ", spread_3mth,
+                           "\nDuring the term of President ", 
+                           current_President, "\nthe debt was at ", 
+                           total_debt, "\nActions taken for the debt: ", 
+                           action_taken, "\nPublic Law: ", public_law))%>%
+    layout(title = list(text = "Exchange Rates vs Spreads", font = titlefont))%>%
+    style(hoverinfo = "skip", traces = 3)         
+  
+  return(value)
+}
 
+#formatting graphs 
+formatting <- function(value,choice){
+  if(choice != "Yields"){
+      title_text = "Exchange Rates over Time vs Spread"
+      y_text = "Spot Exchange Rates(EUR, CNY, JPY)"
+        }
+  else{
+    title_text = "Yields over Time"
+    y_text = "All Yields"
+  }
   #Rangeslider is operating !!!
   #Hovermode = "x unified" helps to make the data readable for all three lines
-  d <- d %>% layout(plot_bgcolor = 'white',
+  value <- value %>%layout(plot_bgcolor = 'white',
                     paper_bgcolor = 'lightgray',  
-                    updatemenus = list(
-                      list(type = 'buttons',
-                           direction = "up",
-                           xanchor = 'right',
-                           yanchor = 'top',
-                           x = 1.25, y = 1, 
-                           showactive = T,
-                           buttons = list(B_Euro, B_Yuan, B_Yen, B_All))
-                    ),
-                    title = list(text = title_,
-                                 font = titlefont),
                     xaxis = list(title = list(text = "Dates",
-                                              font = axesfont),
-                                 rangeslider = list(visible = T)),
-                    yaxis = list(title = list(text = "Spot Exchange Rates",
-                                              font = axesfont)
-                                 ,showgrid = F),
+                                 font = axesfont), rangeslider = list(visible = T)),
+                    yaxis = list(title = list(text = y_text,
+                                 font = axesfont), showgrid = F),
                     hovermode = "x unified",
                     legend = list(orientation = "v", x = 100, y = 0.90,
-                                  title=list(text='<b> Legend </b>',
-                                             font = axesfont))
-  )
-  return(d)
+                                  title=list(text='<b> Legend </b>', font = axesfont))
+             )
+  return(value)
 }
-
+#make either a case when or switch for yield chart and currency chart
+  
 #make sure to clear variables from r if reloading more than once
 #or you'll have multiple yuan and yen titles in the legend
 #Other than that both graphs are functional!!!
-ty <- readline("Enter a title: ")
-two_year <- currencies(two_year, ty) 
-three_mo <- currencies(three_mo, ty)
+ty = readline("Enter a title: ")
+two_year <- currencies(two_year) 
+three_mo <- currencies(three_mo)
+
+choice = readline("Yields or Exchange Rates(2-Year Spreads or 3-Month Spreads): ")
+result = switch(
+  choice,
+  "2-Year Spreads" = print(currencies_2yr(two_year, choice)),
+  "3-Month Spreads" = print(currencies_3mth(three_mo, choice)), 
+  "Yields" = print(formatting(yield_Treasury, choice))
+                )
+
 
 #Wrap in loop and put readline in function call
-save_graphs <- function(p){
+save_graphs <- function(graph_){
       library(htmlwidgets)
-      
-      saveWidget(p, readline("Name of the file(end with .html): "))
+      saveWidget(graph_, readline("Name of the file(end with .html): "))
 }
-
-#Running correlations between different currencies and yield spreads
-cor(data[, -c(1, 7, 8)], use = "complete.obs")
-
-#Running correlations between currencies and the rise and fall of the indexes
-cor(data[, -c(1)], use = "complete.obs")
-
-#Running correlations between currencies and the yields of 3 different maturities
-cor(data[, -c(1, 8:11)], use = "complete.obs")
-
-#Running correlations between currencies, maturities and spreads
-cor(data[, -c(1, 10:11)], use = "complete.obs")
-
-#Running correlations between indexes and yields
-cor(data[, -c(1, 5:9)], use = "complete.obs")
-
-
 
 rm(list = ls())

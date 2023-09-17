@@ -29,8 +29,7 @@ titlefont <-list(family = "Georgia",
 axesfont <- list(family = "Georgia",
                  size = 14,
                  color = "black")
-label <- list(text = template,
-              bgcolor = "tan",
+label <- list(bgcolor = "tan",
               bordercolor = "transparent",
               font = list(family = "Georgia",
                           size = 11,
@@ -137,18 +136,18 @@ formatting <- function(value,choice){
 #make sure to clear variables from r if reloading more than once
 #or you'll have multiple yuan and yen titles in the legend
 #Other than that both graphs are functional!!!
-ty = readline("Enter a title: ")
-two_year <- currencies(two_year) 
-three_mo <- currencies(three_mo)
+Yields <- formatting(yield_Treasury, choice) 
+three_mth <- currencies_3mth(three_mo, choice)
+two_spr_ <- currencies_2yr(two_year, choice)
 
-choice = readline("Yields or Exchange Rates(2-Year Spreads or 3-Month Spreads): ")
+print("What graph do you need(2-Year Spreads,3-Month Spreads, Yields)")
+choice = readline("Choice: ")
 result = switch(
   choice,
-  "2-Year Spreads" = print(currencies_2yr(two_year, choice)),
-  "3-Month Spreads" = print(currencies_3mth(three_mo, choice)), 
-  "Yields" = print(formatting(yield_Treasury, choice))
+  "2-Year Spreads" = print(two_spr_),
+  "3-Month Spreads" = print(three_mth), 
+  "Yields" = print(Yields)
                 )
-
 
 #Wrap in loop and put readline in function call
 save_graphs <- function(graph_){

@@ -9,9 +9,22 @@ if(answer == "Upload") {
   attach(data)
 }
 
+
 library(dplyr)
 library(scales)
-data <- data %>% mutate(dates = as.Date(dates, format = "%Y-%m-%d"))
+library(zoo)
+total_debt_ <- fortify.zoo(na.locf(zoo(total_debt), na.rm = FALSE))
+total_debt_ <- total_debt_[, 2]
+actions <- subset(data, action_taken == 'Raised Debt Ceiling' | action_taken == 'Suspend Debt Ceiling', 
+                  select = c('dates', 'total_debt'))
+actions <- as.data.frame(actions)
+actions["action_dates"] <- actions$dates
+actions["debt_ceiling_now"] <- actions$total_debt
+
+data <- data %>% mutate(dates = as.Date(dates, format = "%Y-%m-%d"))%>% 
+  mutate(debt_no_nas = total_debt_)#instead make a column called total debt with no nas 
+data <- merge(x = data, y = actions, by = "dates", all.x=TRUE)
+
 str(data)
 
 #libraries needed to graph
@@ -35,32 +48,52 @@ label <- list(bgcolor = "tan",
                           size = 11,
                           color = "white"))
 
-#2 yr yields are plotted here
-two_year <- plot_ly(data, x = ~dates, y = ~Euro, mode = "lines", type = "scatter",name = "Euro", 
+#Market against the currencies
+sp <- plot_ly(data, x = ~dates, y = ~Euro, mode = "lines", type = "scatter",name = "Euro", 
                line = list(color = "rgb(251,107,1)"))%>%
-  add_trace(x = ~dates, y = ~spread_2yr, mode = "lines", type = "scatter", yaxis = "y2", 
+  add_trace(x = ~dates, y = ~data$`S&P_1500`, mode = "lines", type = "scatter", yaxis = "y2", 
             name = "2-yr yields", line = list(color = 'rgb(251,194,2)'))%>%
   layout(yaxis2 = list(overlaying = "y", side = "right", showgrid = F))%>%
   style(hoverinfo = "skip", traces = c(1, 2))
   
-
-#3 mth yields are plotted here
-three_mo <- plot_ly(data, x = ~dates,y = ~Euro, mode = "lines", type = "scatter", name = "Euro", 
+ns <- plot_ly(data, x = ~dates,y = ~Euro, mode = "lines", type = "scatter", name = "Euro", 
                line = list(color = 'rgb(251,107,1)'))%>%
-  add_trace(x = ~dates, y = ~spread_3mth, mode = "lines", type = "scatter", yaxis = "y2", 
+  add_trace(x = ~dates, y = ~NASDAQ, mode = "lines", type = "scatter", yaxis = "y2", 
             name = "3-mth yields", line = list(color = 'rgb(251,194,2)')) %>%
   layout(yaxis2 = list(overlaying = "y", side = "right", showgrid = F))%>%
   style(hoverinfo = "skip", traces = c(1, 2))        
 
-yield_Treasury <- plot_ly(data, x = ~dates, y = ~yields_3mth, mode = "lines", type = "scatter", name = "3 mth yields", 
-                  line = list(color = 'rgb(230, 126, 34)'))%>%
-    add_trace(y = ~yields_2yr, mode = "lines", type = "scatter", name = "2 year yields", line = list(color = 'rgb(175, 96, 26)'))%>%
-    add_trace(y = ~yields_5yr, mode = "lines", type = "scatter", name = "5 year yields", line = list(color = 'rgb(211, 84, 0)'))%>%
-    add_trace(y = ~yields_7yr, mode = "lines", type = "scatter", name = "7 year yields",line = list(color = 'rgb(231, 76, 60)'))%>%
-    add_trace(y = ~yields_10yr, mode = "lines", type = "scatter", name = "10 year yields",line = list(color = 'rgb(148, 49, 38)'))%>%
-    add_trace(y = ~yields_30yr, mode = "lines", type = "scatter",name = "30 year yields" ,line = list(color = 'rgb(192, 57, 43)'))
+#Debt against the markets
+debt_sp1500 <- plot_ly(data, x = ~dates, y = ~data$`S&P_1500`, mode = "lines", type = "scatter", 
+                       name = "S&P 1500", line = list(color = 'rgb(230, 126, 34)'))%>%
+  add_trace(x = ~action_dates, y = ~debt_ceiling_now, type = "bar", yaxis = "y2", 
+            name = "Debt Ceiling", marker = list(color = 'rgb(15,160,8)'))%>%
+  layout(yaxis2 = list(overlaying = "y", side = "right", showgrid = F))
+
+debt_nasdaq <- plot_ly(data, x = ~dates, y = ~NASDAQ, mode = "lines", type = "scatter", 
+                       name = "S&P 1500", line = list(color = 'rgb(230, 126, 34)'))%>%
+  add_trace(x = ~data$action_dates, y = ~data$debt_ceiling_now, type = "bar", yaxis = "y2", 
+            name = "Debt ceiling", marker = list(color = 'rgb(15,160,8)'))%>%
+  layout(yaxis2 = list(overlaying = "y", side = "right", showgrid = F))
+
+#Debt against yields
+debt_yields <- plot_ly(data, x = ~dates, y = ~yields_10yr, mode = "lines", type = "scatter", 
+                       name = "Ten Year", line = list(color = 'rgb(230, 126, 34)'))%>%
+  add_trace(x = ~action_dates, y = ~debt_ceiling_now, type = "bar", yaxis = "y2" ,name = "Total Debt", marker = list(color = 'rgb(15,160,8)')) %>%
+  layout(yaxis2 = list(overlaying = "y", side = "right", showgrid = F)) %>%
+  add_trace(y = ~yields_2yr, mode = "lines", type = "scatter", name = "2 year", line = list(color = 'rgb(255, 195, 0)'))%>%
+  add_trace(y = ~yields_3mth, mode = "lines", type = "scatter", name = "3 mth",line = list(color = 'rgb(246, 6, 6)'))
+
+#Yields against markets
+market_yields <- plot_ly(data, x = ~dates, y = ~yields_10yr, mode = "lines" ,type = "scatter", name = "10 year", line = list(color = 'rgb(251,194,2)')) %>%
+  add_trace(x = ~dates, y = ~`S&P_1500`, mode = "lines", type = "scatter", yaxis = "y2", 
+            name = "S&P 1500", line = list(color = 'rgb(230, 126, 34)'))%>%
+  layout(yaxis2 = list(overlaying = "y", side = "right", showgrid = F)) %>%
+  add_trace(y = ~yields_2yr, mode = "lines", type = "scatter", name = "2 year", line = list(color = 'rgb(175, 96, 26)'))%>%
+  add_trace(y = ~yields_3mth, mode = "lines", type = "scatter", name = "3 mth",line = list(color = 'rgb(148, 49, 38)'))
+
 #Added the other currencies
-currencies_2yr <- function(value, choice){
+currencies_ns <- function(value, choice){
      value <- formatting(value, choice)
      
      value <- value %>% add_trace(y = ~Yuan, name = 'Yuan', mode = "lines", 
@@ -83,7 +116,7 @@ currencies_2yr <- function(value, choice){
                   
       return(value)
 }
-currencies_3mth <- function(value, choice){
+currencies_sp <- function(value, choice){
   value <- formatting(value, choice)
   
   value <- value %>% add_trace(y = ~Yuan, name = 'Yuan', mode = "lines", 
@@ -106,49 +139,73 @@ currencies_3mth <- function(value, choice){
   
   return(value)
 }
-
 #formatting graphs 
-formatting <- function(value,choice){
-  if(choice != "Yields"){
-      title_text = "Exchange Rates over Time vs Spread"
-      y_text = "Spot Exchange Rates(EUR, CNY, JPY)"
+formatting <- function(value, choice){
+  if(choice == 1){
+      title_text = "Yields and Indicies"
+      y_text = "Yields"
         }
-  else{
-    title_text = "Yields over Time"
-    y_text = "All Yields"
+  else if(choice == 2){
+    title_text = "Debt and Yields"
+    y_text = "Yields"
+  }
+  else if(choice == 3 || choice == 4){
+    title_text = "Debt and Markets"
+    if(choice == 3){
+      y_text = "S&P 1500"
+      }
+    else{
+      y_text = "NASDAQ"    
+    }
+  }
+  else if(choice == 5 || choices == 6){
+    title_text = "Markets and Currencies"
+    if(choice == 5){
+      y_text = "S&P 1500"
+    }
+    else{
+      y_text = "NASDAQ"
+    }
   }
   #Rangeslider is operating !!!
   #Hovermode = "x unified" helps to make the data readable for all three lines
   value <- value %>%layout(plot_bgcolor = 'white',
-                    paper_bgcolor = 'lightgray',  
+                    paper_bgcolor = 'lightgray', 
+                    title = list(text = title_text, font = titlefont),
                     xaxis = list(title = list(text = "Dates",
                                  font = axesfont), rangeslider = list(visible = T)),
-                    yaxis = list(title = list(text = y_text,
-                                 font = axesfont), showgrid = F),
+                    yaxis = list(title = list(text = y_text ,font = axesfont), showgrid = F),
                     hovermode = "x unified",
-                    legend = list(orientation = "v", x = 100, y = 0.90,
+                    legend = list(orientation = "v", x = 1.15, y = 0.90,
                                   title=list(text='<b> Legend </b>', font = axesfont))
              )
   return(value)
 }
-#make either a case when or switch for yield chart and currency chart
+#adding yields over days that debt ceiling raised
+
   
 #make sure to clear variables from r if reloading more than once
 #or you'll have multiple yuan and yen titles in the legend
 #Other than that both graphs are functional!!!
-Yields <- formatting(yield_Treasury, choice) 
-three_mth <- currencies_3mth(three_mo, choice)
-two_spr_ <- currencies_2yr(two_year, choice)
-
-print("What graph do you need(2-Year Spreads,3-Month Spreads, Yields)")
-choice = readline("Choice: ")
+print("What do you want to look at:
+      \n\t1. Yields & Indicies(S&P 1500)
+      \n\t2. Debt & Yields
+      \n\t3. Currency & Indices(S&P 1500)
+      \n\t4. Currency & Indices(NASDAQ)
+      \n\t5. Debt & Indices(S&P 1500)
+      \n\t6. Debt & Indices(NASDAQ)\n\t")
+choice = strtoi(readline("Choice(Number): "))
 result = switch(
   choice,
-  "2-Year Spreads" = print(two_spr_),
-  "3-Month Spreads" = print(three_mth), 
-  "Yields" = print(Yields)
-                )
+  1 == print(formatting(market_yields, choice)),
+  2 == print(formatting(debt_yields, choice)), 
+  3 == print(currencies_sp(sp, choice)),
+  4 == print(currencies_ns(ns, choice)),
+  5 == print(formatting(debt_sp1500, choice)),
+  6 == print(formatting(debt_nasdaq, choice))
+)
 
+#Make one for each graph instead
 #Wrap in loop and put readline in function call
 save_graphs <- function(graph_){
       library(htmlwidgets)

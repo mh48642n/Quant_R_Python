@@ -7,14 +7,17 @@ Created on Mon Aug 21 17:10:05 2023
 
 import openpyxl as op
 import pandas as pd
-import pyexcel as p
+import os
 
 def menu():
     print("Data wrangling with Python\n")
+    
     answer = input("""For Merging: \n\tPress 1 
-                   \nFor joining individual columns \n\tPress 2  
-                   \nFor changing xls file to xlsx file \n\tPress 3
-                   \nF\nAnswer: """)
+            \nFor joining individual columns \n\tPress 2  
+            \nFor changing xls file to xlsx file[Not working right now] \n\tPress 3
+            \nFor Getting Work Directory\n\tPress 4
+            \nFor 400 data file creation[advised to put all files being merged in the same directory]: \n\tPress 5
+            \n\nChoice: """)
     
     return answer
     
@@ -62,8 +65,10 @@ def addingToDict(col_name, col_index):
     return dataset
     
 def findingColumns(col_index, begin, end, sheetName):
-    fileName = input("\nFile(path)that you want join columns from: ")
+    print(r"""Put all .xls and .xlsx files be intereacted with in the same directory\n
+          \te.g. C:\Users\Downloads or if there's a folder C:\Users\Downloads\_folder_new """)
     
+    fileName = input("\nFile(path)that you want join columns from: ")
     
     bk = op.load_workbook(fileName) 
     bk.active = bk[sheetName]
@@ -74,47 +79,113 @@ def findingColumns(col_index, begin, end, sheetName):
     bk.close()
     
     return data
-def mergingtables():
-    left = pd.read_excel(input("\n\tLeft: "), sheet_name = "Sheet 1")
-    right = pd.read_excel(input("\tRight: "), sheet_name = "Sheet 1")
+
+# This function is made to merge multiple excel files together 
+# An important aspect of this is that the first merge will be left merge in the following function
+# Thus when you do a second merge keep that in mind 
+# You have to know what columns to join on 
+# For the 400 project selection start will equal true  
+def mergingtables(start):
+
+    if(start == False):
+        num = int(input("Number of merges you're doing today"))
+
+        file1 = input("\n\tLeft(just filename): ")
+        file2 = input("\tRight(just filename): ")
     
-    howto = input("\n\tJoin how?(left, right, inner, outer):")
-    onwhat = input("\tJoin on what column: ")
+        left = pd.read_excel(file1, sheet_name = "Sheet 1")
+        right = pd.read_excel(file2, sheet_name = "Sheet 1")
+        
+        how_to = input("\n\tJoin how?(left, right, inner, outer):")
+        on_what = input("\tJoin on what column: ")
+        
+        merge = pd.merge(left, right, how = how_to, on = on_what, sort = True)
+        num = num - 1
+
+        for i in range(num):
+            right = input("\n\tRight(just filename): ")
+            right = pd.read_excel(right, sheet_name = "Sheet 1")
+
+            how_to = input("\n\tJoin how?(left, right, inner, outer):")
+            on_what = input("\tJoin on what column: ")
+            
+            merge = pd.merge(merge, right, how = how_to, on = on_what, sort = True)
+        
+    if(start == True):
+        left = pd.read_excel("indices_vals.xlsx", sheet_name = "Sheet 1")
+        right = pd.read_excel("debt_to_the_penny.xlsx", sheet_name = "Sheet 1")
+
+        merge = pd.merge(left, right, how = "left", on = "dates", sort = True)
+
+        files = {0: "macro_factors.xlsx", 1: "debt_ceiling_dates.xlsx"}
+
+        for values in files.items():
+            right = pd.read_excel(values, sheet_name = "Sheet 1")
+            merge = pd.merge(merge, right, how = "left", on = "dates", sort = True)
+        
+
+
+# This menu has 5 possible selections 
+# And it works until the user says no or in this case N
+keep_going = "Y"
+
+# Loop choices of data manipulation and merging
+while(keep_going == "Y"):
+    answer = int(menu())
+
+    match answer: 
+        case 1:
+            print("Welcome to the file_merger")
+            cond = "Yes" 
+            
+            while(cond == "Yes"):
+                start = False
+                merge = mergingtables(start)
+                merge.to_excel(input("Name of new file(.xlsx or .xls): "), sheet_name = "Sheet 1", index = False)
+                cond = input("Continue merging, Yes or No: ")
+                merge = None
+        case 2:
+            print("Welcome to the column_joiner")
+            file = input("New file name(.xlsx or .xls): ")
+            col_name = input("\nWhat you want new column to be named in the new excel workbook: ")
+            col_index = int(input("Index of the column being read(so column A is 1):"))    
+            
+            data = addingToDict(col_name, col_index)
+            data.to_excel(file, sheet_name = "Sheet 1", index = False)
+            data = None
+        case 3: 
+            print("This is file converter, only for xls to xlsx!!!")
+            #convert_files()
+        case 4:
+            path_nm = os.getcwd()  
+            print(path_nm)      
+        case 5: 
+            print("Do you want to change working directory from:", os.getcwd() , "\n")
+            confirm = input("\tConfirm: ")
+
+            if(confirm == "Yes"):    
+                while(cont == True):
+                    cont = False
+                    try:    
+                        os.chdir(input("Name of path: "))
+                    except:
+                        print("""\nType the path with double back-slashes instead
+                              \nOr if you messed up with writing the path then retype it""")
+                        cont = True
+                    
+            cond = "Yes"
+            while(cond == "Yes"):
+                start = True
+                merge = mergingtables(start)     
+                merge.to_excel(input("Name of new file(.xlsx or .xls): "), sheet_name = "Sheet 1", index = False)
+                merge = None
+                cond = "No"
     
-    merge = pd.merge(left, right, how = howto, on = onwhat, sort = True)
-    return merge
-def convert_files():
-    p.save_book_as(file_name = input("Name of path with double backslashes: "),
-                   dest_file_name = input("Name of new path woth double backslashes: "))
+    keep_going = input("Continue the program? Y or N: ")
+    print("\n\n")
+            
 
-
-
-answer = int(menu())    
-
-match answer: 
-    case 1:
-        print("Welcome to the file_merger")
-        cond = "Yes" 
-        
-        while(cond == "Yes"):
-            merge = mergingtables()
-            merge.to_excel(input("Name of new file(.xlsx or .xls): "), sheet_name = "Sheet 1", index = False)
-            cond = input("Continue merging, Yes or No: ")
-            merge = None
-    case 2:
-        print("Welcome to the column_joiner")
-        file = input("New file name(.xlsx or .xls): ")
-        col_name = input("\nWhat you want new column to be named in the new excel workbook: ")
-        col_index = int(input("Index of the column being read(so column A is 1):"))    
-        
-        data = addingToDict(col_name, col_index)
-        data.to_excel(file, sheet_name = "Sheet 1", index = False)
-        data = None
-    case 3: 
-        print("This is file converter, only for xls to xlsx!!!")
-        convert_files()
-
-print("Have fun analyzing this data!!!!")
+print("\n\nHave fun analyzing this data!!!!")
     
     
 

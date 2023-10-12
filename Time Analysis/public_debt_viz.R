@@ -64,14 +64,14 @@ ns <- plot_ly(data, x = ~dates,y = ~Euro, mode = "lines", type = "scatter", name
   style(hoverinfo = "skip", traces = c(1, 2))        
 
 #Debt against the markets
-debt_sp1500 <- plot_ly(data, x = ~dates, y = ~data$`S&P_1500`, mode = "lines", type = "scatter", 
+debt_sp1500 <- plot_ly(data, x = ~dates, y = ~`data$`S&P_1500`, mode = "lines", type = "scatter", 
                        name = "S&P 1500", line = list(color = 'rgb(230, 126, 34)'))%>%
   add_trace(x = ~action_dates, y = ~debt_ceiling_now, type = "bar", yaxis = "y2", 
             name = "Debt Ceiling", marker = list(color = 'rgb(15,160,8)'))%>%
   layout(yaxis2 = list(overlaying = "y", side = "right", showgrid = F))
 
 debt_nasdaq <- plot_ly(data, x = ~dates, y = ~NASDAQ, mode = "lines", type = "scatter", 
-                       name = "S&P 1500", line = list(color = 'rgb(230, 126, 34)'))%>%
+                       name = "NASDAQ", line = list(color = 'rgb(230, 126, 34)'))%>%
   add_trace(x = ~data$action_dates, y = ~data$debt_ceiling_now, type = "bar", yaxis = "y2", 
             name = "Debt ceiling", marker = list(color = 'rgb(15,160,8)'))%>%
   layout(yaxis2 = list(overlaying = "y", side = "right", showgrid = F))
